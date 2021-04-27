@@ -431,11 +431,10 @@ class Columns {
         result = column;
       }
 
-      return Object.assign(
-        { content: "", filler: " " },
-        defaultColumnConfig,
-        result
-      );
+      result = Object.assign({ content: "" }, defaultColumnConfig, result);
+      if (!result.filler) result.filler = " ";
+
+      return result as DefaultFormatConfig;
     });
 
     // determine the amount of unclaimed width

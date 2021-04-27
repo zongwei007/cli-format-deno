@@ -1,14 +1,25 @@
-import { afterEach, beforeEach, describe, it } from "../deps/test_suite.ts";
+import { afterAll, beforeEach, describe, it } from "../deps/test_suite.ts";
 import { assertEquals, equal } from "../deps/asserts.ts";
+import { createRequire } from "../deps/modules.ts";
 
 import * as config from "../src/format-config.ts";
 import * as format from "../src/format.ts";
 
-describe("format", function () {
-  config.config.trimEndOfLine = false;
+import type { SeparateFormat } from "../src/format.ts";
 
-  afterEach(function () {
-    config.config.trimEndOfLine = true;
+const require = createRequire(import.meta.url);
+const chalk = require("chalk");
+const colors = require("colors/safe");
+
+describe("format", function () {
+  chalk.enabled = true;
+  colors.enabled = true;
+
+  config.setDefaultConfig({ trimEndOfLine: false, width: 120 });
+  config.setDefaultColumnConfig({ width: 120 });
+
+  afterAll(function () {
+    config.setDefaultConfig({ trimEndOfLine: true });
   });
 
   describe("#columns.lines", function () {
@@ -151,15 +162,15 @@ describe("format", function () {
     });
 
     describe("two columns with different configurations", function () {
-      var lines: string[];
+      let lines: string[];
+
       beforeEach(function () {
-        var config = { ansi: false, paddingMiddle: "" };
         lines = format.columns.lines(
           [
             { content: "1234 678 0123", ansi: false, width: 10 },
             { content: "123456 89012 4567 123456", ansi: true, width: 20 },
           ],
-          config
+          { ansi: false, paddingMiddle: "" }
         );
       });
 
@@ -483,7 +494,7 @@ describe("format", function () {
         });
       });
     });
-/* 
+
     describe("formatting", function () {
       var config = { filler: "", ansi: true, width: 20 };
 
@@ -543,7 +554,7 @@ describe("format", function () {
         ];
         multiLineFormatValidator(4, lines, expected);
       });
-    }); */
+    });
 
     describe("filler", function () {
       var config = { filler: "abc", ansi: false, width: 10 };
@@ -662,9 +673,9 @@ describe("format", function () {
       });
     });
   });
-/* 
-  describe("#separate", function () {
-    config.ansi = true;
+
+  /* describe("#separate", function () {
+    config.setDefaultConfig({ ansi: true });
 
     describe("chalk none-bold-boldItalic-italic-none", function () {
       var str =
@@ -714,8 +725,8 @@ describe("format", function () {
       it("has forth format change to [23]", function () {
         equal(sep.format[3].codes, [23]);
       });
-    }); */
-/* 
+    });
+
     describe("colors none-bold-boldItalic-italic-none", function () {
       var str =
         "01" +
@@ -795,37 +806,37 @@ describe("format", function () {
         assertEquals(format.trim("   abc   ", false, 2), "   abc ");
       });
     });
-/* 
+
     describe("with ansi", function () {
       it("trims start", function () {
         assertEquals(
           format.trim(chalk.blue("   abc   "), true, false),
-          "\u001b[34mabc   \u001b[39m"
+          "\u001b[94mabc   \u001b[39m"
         );
       });
 
       it("trims end", function () {
         assertEquals(
           format.trim(chalk.blue("   abc   "), false, true),
-          "\u001b[34m   abc\u001b[39m"
+          "\u001b[94m   abc\u001b[39m"
         );
       });
 
       it("trims some of start", function () {
         assertEquals(
           format.trim(chalk.blue("   abc   "), 2, false),
-          "\u001b[34m abc   \u001b[39m"
+          "\u001b[94m abc   \u001b[39m"
         );
       });
 
       it("trims some of end", function () {
         assertEquals(
           format.trim(chalk.blue("   abc   "), false, 2),
-          "\u001b[34m   abc \u001b[39m"
+          "\u001b[94m   abc \u001b[39m"
         );
       });
-    });*/
-  }); 
+    });
+  });
 
   describe("#width", function () {
     it("double width character", function () {
@@ -840,10 +851,10 @@ describe("format", function () {
       assertEquals(format.width("x"), 1);
     });
 
-    /* it("ansi has zero width", function () {
+    it("ansi has zero width", function () {
       var input = chalk.bold("x");
       assertEquals(format.width(input), 1);
-    });  */
+    });
   });
 
   describe("#words", function () {
@@ -876,7 +887,7 @@ describe("format", function () {
     });
   });
 });
-/* 
+
 function formatValidator(
   formats: SeparateFormat[],
   expectedMap: Record<string, number[]>
@@ -919,4 +930,3 @@ function multiLineFormatValidator(
     });
   });
 }
- */

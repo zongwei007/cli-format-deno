@@ -68,3 +68,13 @@ export const transform: Record<string, string> = {
   "\r\n": "\n",
   "\t": "  ",
 };
+
+export const setDefaultConfig = (values: Partial<FormatConfig>) => {
+  Object.assign(config, values);
+};
+
+export const setDefaultColumnConfig = (
+  values: Partial<typeof columnConfig>
+) => {
+  Object.assign(columnConfig, values);
+};
