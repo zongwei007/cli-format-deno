@@ -47,7 +47,7 @@ describe("format", function () {
     });
 
     describe("two column", function () {
-      var lines: string[];
+      let lines: string[];
       beforeEach(function () {
         lines = format.columns.lines(["01234 678 012", "abcd fghij lmnop"], {
           ansi: false,
@@ -70,7 +70,7 @@ describe("format", function () {
     });
 
     describe("two columns, first with more lines", function () {
-      var lines: string[];
+      let lines: string[];
       beforeEach(function () {
         lines = format.columns.lines(["01234 678 012", "abcd"], {
           ansi: false,
@@ -93,7 +93,7 @@ describe("format", function () {
     });
 
     describe("two columns, second with more lines", function () {
-      var lines: string[];
+      let lines: string[];
       beforeEach(function () {
         lines = format.columns.lines(["abcd", "01234 678 012"], {
           ansi: false,
@@ -116,7 +116,7 @@ describe("format", function () {
     });
 
     describe("two columns padding middle", function () {
-      var lines: string[];
+      let lines: string[];
       beforeEach(function () {
         lines = format.columns.lines(["01234 678 012", "abcd"], {
           ansi: false,
@@ -139,7 +139,7 @@ describe("format", function () {
     });
 
     describe("two columns with new line", function () {
-      var lines: string[];
+      let lines: string[];
       beforeEach(function () {
         lines = format.columns.lines(["abcd", "01234\n01 2345"], {
           ansi: false,
@@ -194,7 +194,7 @@ describe("format", function () {
     });
 
     describe("two columns, first is empty", function () {
-      var lines: string[];
+      let lines: string[];
       beforeEach(function () {
         lines = format.columns.lines([null, "1234"], {
           ansi: false,
@@ -215,7 +215,7 @@ describe("format", function () {
 
   describe("#column.wrap", function () {
     it("has two lines", function () {
-      var result = format.columns.wrap(["123 567 1234", "123456 890 0123"], {
+      const result = format.columns.wrap(["123 567 1234", "123456 890 0123"], {
         ansi: false,
         paddingMiddle: "",
         width: 22,
@@ -227,24 +227,24 @@ describe("format", function () {
   describe("#justify", function () {
     it("equal justification", function () {
       //           0123456789 123456              0123456789 123456789
-      var input = "This is a string.";
+      const input = "This is a string.";
       assertEquals(format.justify(input, 20), "This  is  a  string.");
     });
 
     it("inequal justification", function () {
       //           0123456789 123456              0123456789 1234567
-      var input = "This is a string.";
+      const input = "This is a string.";
       assertEquals(format.justify(input, 18), "This  is a string.");
     });
   });
 
   describe("#lines", function () {
     describe("no formatting", function () {
-      var config = { filler: "", ansi: false, width: 20 };
+      const config = { filler: "", ansi: false, width: 20 };
 
       describe("exact line length", function () {
-        var input = "0123456789 123456789 1";
-        var lines = format.lines(input, config);
+        const input = "0123456789 123456789 1";
+        const lines = format.lines(input, config);
 
         it("has two lines", function () {
           assertEquals(lines.length, 2);
@@ -264,8 +264,8 @@ describe("format", function () {
       });
 
       describe("line ends in space", function () {
-        var input = "0123456789 12345678 01";
-        var lines = format.lines(input, config);
+        const input = "0123456789 12345678 01";
+        const lines = format.lines(input, config);
 
         it("has two lines", function () {
           assertEquals(lines.length, 2);
@@ -281,8 +281,8 @@ describe("format", function () {
       });
 
       describe("line ends in dash", function () {
-        var input = "0123456789 12345678-01";
-        var lines = format.lines(input, config);
+        const input = "0123456789 12345678-01";
+        const lines = format.lines(input, config);
 
         it("has two lines", function () {
           assertEquals(lines.length, 2);
@@ -298,8 +298,8 @@ describe("format", function () {
       });
 
       describe("long word", function () {
-        var input = "0123 56789012345678901234 6789 1234";
-        var lines = format.lines(input, config);
+        const input = "0123 56789012345678901234 6789 1234";
+        const lines = format.lines(input, config);
 
         it("has three lines", function () {
           assertEquals(lines.length, 3);
@@ -319,8 +319,8 @@ describe("format", function () {
       });
 
       describe("too long word same line", function () {
-        var input = "0123 5678901234567890123456789 1234";
-        var lines = format.lines(input, config);
+        const input = "0123 5678901234567890123456789 1234";
+        const lines = format.lines(input, config);
 
         it("has two lines", function () {
           assertEquals(lines.length, 2);
@@ -336,8 +336,8 @@ describe("format", function () {
       });
 
       describe("too long word next line", function () {
-        var input = "012345 7890123456 8901234567890123456789 1234";
-        var lines = format.lines(input, config);
+        const input = "012345 7890123456 8901234567890123456789 1234";
+        const lines = format.lines(input, config);
 
         it("has three lines", function () {
           assertEquals(lines.length, 3);
@@ -357,8 +357,8 @@ describe("format", function () {
       });
 
       describe("too long word first line indent", function () {
-        var input = "2345678901234567890 23456789 1234";
-        var lines = format.lines(input, {
+        const input = "2345678901234567890 23456789 1234";
+        const lines = format.lines(input, {
           filler: "",
           ansi: false,
           width: 20,
@@ -380,8 +380,8 @@ describe("format", function () {
       });
 
       describe("too long word hanging indent", function () {
-        var input = "0123 567890123456789012345 789 1234";
-        var lines = format.lines(input, {
+        const input = "0123 567890123456789012345 789 1234";
+        const lines = format.lines(input, {
           filler: "",
           ansi: false,
           width: 20,
@@ -402,8 +402,8 @@ describe("format", function () {
       });
 
       describe("too long word for 3 lines", function () {
-        var input = "0123 56789012345678901234567890123456789012345 6789 1234";
-        var lines = format.lines(input, { filler: "", ansi: false, width: 20 });
+        const input = "0123 56789012345678901234567890123456789012345 6789 1234";
+        const lines = format.lines(input, { filler: "", ansi: false, width: 20 });
 
         it("has three lines", function () {
           assertEquals(lines.length, 3);
@@ -424,12 +424,12 @@ describe("format", function () {
 
       describe("justification across lines", function () {
         //0123456789 123456789
-        var input =
+        const input =
           "0123 56 89 abcdef " +
           "012 45678 0abc efg " +
           "01234567890abcdefghi " +
           "01234 67";
-        var lines = format.lines(input, {
+        const lines = format.lines(input, {
           filler: "",
           ansi: false,
           width: 20,
@@ -460,12 +460,12 @@ describe("format", function () {
 
       describe("justification with new lines", function () {
         //0123456789 123456789
-        var input =
+        const input =
           "0123 56 89 abcdef\n" +
           "012 45678 0abc efg " +
           "01234567890abcdefghi " +
           "01234 67";
-        var lines = format.lines(input, {
+        const lines = format.lines(input, {
           filler: "",
           ansi: false,
           width: 20,
@@ -496,12 +496,12 @@ describe("format", function () {
     });
 
     describe("formatting", function () {
-      var config = { filler: "", ansi: true, width: 20 };
+      const config = { filler: "", ansi: true, width: 20 };
 
       describe("ends at line length", function () {
-        var input = "0123456789 " + chalk.bold(123456789) + " 1";
-        var lines = format.lines(input, config);
-        var expected: Array<Record<string, number[]>> = [
+        const input = "0123456789 " + chalk.bold(123456789) + " 1";
+        const lines = format.lines(input, config);
+        const expected: Array<Record<string, number[]>> = [
           { "0": [0], "11": [1], "19": [22], "20": [0] },
           { "0": [0], "1": [0] },
         ];
@@ -509,9 +509,9 @@ describe("format", function () {
       });
 
       describe("ends before line length", function () {
-        var input = "0123456789 " + chalk.bold("12345") + "6789 1";
-        var lines = format.lines(input, config);
-        var expected: Array<Record<string, number[]>> = [
+        const input = "0123456789 " + chalk.bold("12345") + "6789 1";
+        const lines = format.lines(input, config);
+        const expected: Array<Record<string, number[]>> = [
           { "0": [0], "11": [1], "16": [22], "20": [0] },
           { "0": [0], "1": [0] },
         ];
@@ -519,9 +519,9 @@ describe("format", function () {
       });
 
       describe("traverses multiple lines", function () {
-        var input = "0123456789 " + chalk.bold("1234567 012345") + " 789";
-        var lines = format.lines(input, config);
-        var expected: Array<Record<string, number[]>> = [
+        const input = "0123456789 " + chalk.bold("1234567 012345") + " 789";
+        const lines = format.lines(input, config);
+        const expected: Array<Record<string, number[]>> = [
           { "0": [0], "11": [1], "19": [0] },
           { "0": [0, 1], "6": [22], "10": [0] },
         ];
@@ -529,9 +529,9 @@ describe("format", function () {
       });
 
       describe("traverses new line", function () {
-        var input = "012 " + chalk.bold("45\n0123") + " 567";
-        var lines = format.lines(input, config);
-        var expected: Array<Record<string, number[]>> = [
+        const input = "012 " + chalk.bold("45\n0123") + " 567";
+        const lines = format.lines(input, config);
+        const expected: Array<Record<string, number[]>> = [
           { "0": [0], "4": [1], "6": [0] },
           { "0": [0, 1], "4": [22], "8": [0] },
         ];
@@ -539,14 +539,14 @@ describe("format", function () {
       });
 
       describe("new format per line", function () {
-        var input =
+        const input =
           "01\n" +
           chalk.bold("23\n") +
           chalk.italic("45") +
           "\n" +
           chalk.underline("67");
-        var lines = format.lines(input, config);
-        var expected = [
+        const lines = format.lines(input, config);
+        const expected = [
           { "0": [0], "2": [0] },
           { "0": [0, 1], "2": [0] },
           { "0": [0, 3], "2": [0] },
@@ -557,9 +557,9 @@ describe("format", function () {
     });
 
     describe("filler", function () {
-      var config = { filler: "abc", ansi: false, width: 10 };
-      var input = "012345 789 012345 01234567";
-      var lines = format.lines(input, config);
+      const config = { filler: "abc", ansi: false, width: 10 };
+      const input = "012345 789 012345 01234567";
+      const lines = format.lines(input, config);
 
       it("has three lines", function () {
         assertEquals(lines.length, 3);
@@ -579,9 +579,9 @@ describe("format", function () {
     });
 
     describe("paddingLeft", function () {
-      var config = { filler: " ", ansi: false, width: 10, paddingLeft: ">" };
-      var input = "12345 789 123";
-      var lines = format.lines(input, config);
+      const config = { filler: " ", ansi: false, width: 10, paddingLeft: ">" };
+      const input = "12345 789 123";
+      const lines = format.lines(input, config);
 
       it("has two lines", function () {
         assertEquals(lines.length, 2);
@@ -597,9 +597,9 @@ describe("format", function () {
     });
 
     describe("paddingRight", function () {
-      var config = { filler: " ", ansi: false, width: 10, paddingRight: "<" };
-      var input = "12345 789 123";
-      var lines = format.lines(input, config);
+      const config = { filler: " ", ansi: false, width: 10, paddingRight: "<" };
+      const input = "12345 789 123";
+      const lines = format.lines(input, config);
 
       it("has two lines", function () {
         assertEquals(lines.length, 2);
@@ -615,14 +615,14 @@ describe("format", function () {
     });
 
     describe("first line indent", function () {
-      var config = {
+      const config = {
         firstLineIndent: "  ",
         filler: " ",
         ansi: false,
         width: 10,
       };
-      var input = "2345 789 012345";
-      var lines = format.lines(input, config);
+      const input = "2345 789 012345";
+      const lines = format.lines(input, config);
 
       it("has two lines", function () {
         assertEquals(lines.length, 2);
@@ -638,9 +638,9 @@ describe("format", function () {
     });
 
     describe("hanging indent", function () {
-      var config = { hangingIndent: "  ", filler: " ", ansi: false, width: 10 };
-      var input = "012345 789 2345";
-      var lines = format.lines(input, config);
+      const config = { hangingIndent: "  ", filler: " ", ansi: false, width: 10 };
+      const input = "012345 789 2345";
+      const lines = format.lines(input, config);
 
       it("has two lines", function () {
         assertEquals(lines.length, 2);
@@ -656,9 +656,9 @@ describe("format", function () {
     });
 
     describe("new line", function () {
-      var config = { ansi: false, width: 10 };
-      var input = "0123\n012 4567";
-      var lines = format.lines(input, config);
+      const config = { ansi: false, width: 10 };
+      const input = "0123\n012 4567";
+      const lines = format.lines(input, config);
 
       it("has two lines", function () {
         assertEquals(lines.length, 2);
@@ -852,31 +852,31 @@ describe("format", function () {
     });
 
     it("ansi has zero width", function () {
-      var input = chalk.bold("x");
+      const input = chalk.bold("x");
       assertEquals(format.width(input), 1);
     });
   });
 
   describe("#words", function () {
     it("spaces", function () {
-      var result = format.words("This is a test");
+      const result = format.words("This is a test");
       equal(result, ["This ", "is ", "a ", "test"]);
     });
 
     it("dash", function () {
-      var result = format.words("crazy-good");
+      const result = format.words("crazy-good");
       equal(result, ["crazy-", "good"]);
     });
 
     it("new line", function () {
-      var result = format.words("new\nline");
+      const result = format.words("new\nline");
       equal(result, ["new\n", "line"]);
     });
   });
 
   describe("#wrap", function () {
-    var input = "123 56 890 2345";
-    var result = format.wrap(input, { ansi: false, width: 10 });
+    const input = "123 56 890 2345";
+    const result = format.wrap(input, { ansi: false, width: 10 });
 
     it("has two lines", function () {
       assertEquals(result.split("\n").length, 2);
@@ -892,14 +892,14 @@ function formatValidator(
   formats: SeparateFormat[],
   expectedMap: Record<string, number[]>
 ) {
-  var keys = Object.keys(expectedMap);
+  const keys = Object.keys(expectedMap);
 
   it("has " + keys.length + " format sets", function () {
     assertEquals(formats.length, keys.length);
   });
 
   keys.forEach(function (key, index) {
-    var value = expectedMap[key];
+    const value = expectedMap[key];
 
     describe("format " + index, function () {
       it("has index " + key, function () {
@@ -918,7 +918,7 @@ function multiLineFormatValidator(
   lines: string[],
   expected: Array<Record<string, number[]>>
 ) {
-  var formats = lines.map((line) => format.separate(line).format);
+  const formats = lines.map((line) => format.separate(line).format);
 
   it("has " + expectedLines + " lines", function () {
     assertEquals(lines.length, expectedLines);

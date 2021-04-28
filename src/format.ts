@@ -4,12 +4,13 @@ import stringWidth from "../deps/string-width.ts";
 
 import type { FormatConfig } from "./format-config.ts";
 
-export type Column = FormatConfig & {
-  content: string | number | boolean;
+export type Column = Partial<ColumnFormatConfig> & {
+  content: ColumnFormatConfig["content"];
 };
 
-export type DefaultFormatConfig = Omit<Column, "width"> & {
-  width?: Column["width"];
+export type ColumnFormatConfig = Omit<FormatConfig, "width"> & {
+  content: string | number | boolean;
+  width?: FormatConfig["width"];
 };
 
 export type SeparateFormat = {
@@ -46,30 +47,25 @@ export function toLines(
   str: string,
   configuration: Partial<FormatConfig> = {}
 ): string[] {
-  var activeFormat = [0];
-  var availableWidth;
-  var config = Object.assign({}, formatConfig.config, configuration);
-  var data = separateString(str);
-  var firstLineIndentWidth = getStringWidth(config.firstLineIndent);
-  var formats = data.format;
-  var hangingIndentWidth = getStringWidth(config.hangingIndent);
-  var indentWidth = firstLineIndentWidth;
-  var index = 0;
-  var lastLineIndexes: { [key: number]: boolean } = {};
-  var line = "";
-  var lines = [];
-  var lineWidth = 0;
-  var newLine;
-  var newLineRx = /\n$/;
-  var o;
-  var paddingLeftWidth = getStringWidth(config.paddingLeft);
-  var paddingRightWidth = getStringWidth(config.paddingRight);
-  var trimmedWord;
-  var trimmedWordWidth;
-  var width = config.width - paddingLeftWidth - paddingRightWidth;
-  var wordWidth;
-  var word;
-  var words = getStringWords(data.value);
+  const config = Object.assign({}, formatConfig.config, configuration);
+  const data = separateString(str);
+  const firstLineIndentWidth = getStringWidth(config.firstLineIndent);
+  const formats = data.format;
+  const hangingIndentWidth = getStringWidth(config.hangingIndent);
+  const lastLineIndexes: { [key: number]: boolean } = {};
+  const newLineRx = /\n$/;
+  const words = getStringWords(data.value);
+  const paddingLeftWidth = getStringWidth(config.paddingLeft);
+  const paddingRightWidth = getStringWidth(config.paddingRight);
+  const width = config.width - paddingLeftWidth - paddingRightWidth;
+
+  let indentWidth = firstLineIndentWidth;
+  let index = 0;
+  let line = "";
+  let lines = [];
+  let lineWidth = 0;
+  let newLine;
+  let word;
 
   function ansiEncode(codes: number[]) {
     return config.ansi ? ansi.escape[0] + "[" + codes.join(";") + "m" : "";
@@ -86,12 +82,13 @@ export function toLines(
 
   // separate words into lines
   while ((word = words.shift())) {
-    availableWidth = width - lineWidth - indentWidth;
+    const availableWidth = width - lineWidth - indentWidth;
+    const trimmedWord = word.replace(/ $/, "");
+    const trimmedWordWidth = getStringWidth(trimmedWord);
+    const wordWidth = getStringWidth(word);
+
     index += word.length;
     newLine = newLineRx.test(word);
-    trimmedWord = word.replace(/ $/, "");
-    trimmedWordWidth = getStringWidth(trimmedWord);
-    wordWidth = getStringWidth(word);
 
     // word fits on line
     if (wordWidth <= availableWidth) {
@@ -109,6 +106,7 @@ export function toLines(
 
       // word is too long for any line
     } else if (trimmedWordWidth > width - indentWidth) {
+      let o;
       // add to the end of the current line
       if (availableWidth > 3) {
         o = maximizeLargeWord(word, config.hardBreak, availableWidth);
@@ -155,6 +153,7 @@ export function toLines(
   if (line.length > 0) lines.push(line);
   lastLineIndexes[lines.length - 1] = true;
 
+  let activeFormat = [0];
   // add formatting to the lines
   if (config.ansi) {
     index = 0;
@@ -189,12 +188,10 @@ export function toLines(
 
   // add padding and indents to the lines
   lines = lines.map(function (line, index) {
-    var firstLine = index === 0;
-    var indent = firstLine ? config.firstLineIndent : config.hangingIndent;
-    var indentWidth = firstLine ? firstLineIndentWidth : hangingIndentWidth;
-    var isLastLine = lastLineIndexes[index];
-    var prefix;
-    var suffix;
+    const firstLine = index === 0;
+    const indent = firstLine ? config.firstLineIndent : config.hangingIndent;
+    const indentWidth = firstLine ? firstLineIndentWidth : hangingIndentWidth;
+    const isLastLine = lastLineIndexes[index];
 
     // remove all new line characters as they were accounted for during line creation
     line = line.replace(/\n/g, "");
@@ -209,8 +206,8 @@ export function toLines(
       line = justify(line, width - indentWidth);
 
     // add padding and indents
-    prefix = config.paddingLeft + indent;
-    suffix =
+    let prefix = config.paddingLeft + indent;
+    let suffix =
       getFiller(width - getStringWidth(line) - indentWidth, config.filler) +
       config.paddingRight;
 
@@ -232,32 +229,31 @@ export function toLines(
 function separateString(
   str: string
 ): { format: SeparateFormat[]; value: string } {
-  var activeCodes: number[] = [];
-  var additionalCodes;
-  var format = [];
-  var match;
-  var o;
-  var prevIndex = -1;
-  var prevCodes;
-  var result = "";
-  var rx;
-
+  const format = [];
   // build the RegExp for finding ansi escape sequences
-  rx = new RegExp("[" + ansi.escape.join("") + "]\\[((?:\\d;?)+)+m");
+  const rx = new RegExp("[" + ansi.escape.join("") + "]\\[((?:\\d;?)+)+m");
+
+  let activeCodes: number[] = [];
+  let prevIndex = -1;
+  let result = "";
 
   // begin separating codes from content
   while (str.length > 0) {
-    match = rx.exec(str);
+    const match = rx.exec(str);
+
     if (match) {
+      const additionalCodes = match[1].split(";").map((v) => parseInt(v));
+
+      let o;
+
       result += str.substr(0, match.index);
       str = str.substr(match.index + match[0].length);
-      additionalCodes = match[1].split(";").map((v) => parseInt(v));
 
       if (prevIndex === result.length) {
         o = format[format.length - 1];
         o.codes = ansi.adjust(o.codes, additionalCodes);
       } else {
-        prevCodes = ansi.clearDefaults(activeCodes);
+        const prevCodes = ansi.clearDefaults(activeCodes);
         o = {
           index: result.length,
           codes: ansi.adjust(prevCodes, additionalCodes),
@@ -308,12 +304,13 @@ export function trim(
   start: boolean | number,
   end: boolean | number
 ): string {
-  var rx;
-  var template = "([" + ansi.escape.join("") + "]\\[(?:(?:\\d;?)+)+m)?";
+  const template = "([" + ansi.escape.join("") + "]\\[(?:(?:\\d;?)+)+m)?";
 
   //trim the start
-  rx = new RegExp("^" + template + " ");
+  let rx = new RegExp("^" + template + " ");
+
   if (typeof start == "number" && start <= 0) start = false;
+
   while (rx.test(str) && start) {
     str = str.replace(rx, "$1");
     if (typeof start === "number") {
@@ -324,7 +321,9 @@ export function trim(
 
   //trim the end
   rx = new RegExp(" " + template + "$");
+
   if (typeof end == "number" && end <= 0) end = false;
+
   while (rx.test(str) && end) {
     str = str.replace(rx, "$1");
     if (typeof end === "number") {
@@ -342,19 +341,19 @@ export function trim(
  * @param keepAnsi
  */
 export function getStringWords(content: string, keepAnsi?: boolean): string[] {
-  var ch;
-  var count = 0;
-  var i;
-  var indexes = [0];
-  var word = "";
-  var words = [];
+  const indexes = [0];
+  const words = [];
+
+  let count = 0;
+  let word = "";
 
   // remove ansi formatting
   if (!keepAnsi) content = separateString(content).value;
 
-  for (i = 0; i < content.length; i++) {
+  for (let i = 0; i < content.length; i++) {
+    const ch = content.charAt(i);
+
     count++;
-    ch = content.charAt(i);
     word += ch;
     if (formatConfig.breaks.indexOf(ch) !== -1) {
       words.push(word);
@@ -363,6 +362,7 @@ export function getStringWords(content: string, keepAnsi?: boolean): string[] {
       count = 0;
     }
   }
+
   if (count > 0) words.push(word);
 
   return words;
@@ -374,15 +374,15 @@ export function getStringWords(content: string, keepAnsi?: boolean): string[] {
  * @param str
  */
 function getStringWidth(str: string): number {
-  var ch;
-  var i;
-  var width = stringWidth(str);
-  for (i = 0; i < str.length; i++) {
-    ch = str.charAt(i);
+  let width = stringWidth(str);
+
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charAt(i);
     if (ch in formatConfig.lengths) {
       width += -1 + formatConfig.lengths[ch];
     }
   }
+
   return width;
 }
 
@@ -395,54 +395,57 @@ export function wrap(
   str: string,
   configuration: Partial<FormatConfig> = {}
 ): string {
-  var config = Object.assign({}, formatConfig.config, configuration);
+  const config = Object.assign({}, formatConfig.config, configuration);
   config.width--; // decrement width since we're adding a \n to the end of each line
   return toLines(str, config).join("\n");
 }
 
 class Columns {
   lines(
-    columns: Array<string | Partial<Column> | null>,
+    columns: Array<string | Column | null>,
     configuration: Partial<FormatConfig> = {}
   ) {
-    var columnsLines;
     const columnsWithoutAssignedWidth: number[] = [];
-    var config = Object.assign({}, formatConfig.columnConfig, configuration);
-    var middlePaddingWidth = getStringWidth(config.paddingMiddle);
-    var result = [];
-    var unclaimedWidth;
+    const config = Object.assign({}, formatConfig.columnConfig, configuration);
+    const middlePaddingWidth = getStringWidth(config.paddingMiddle);
+    const result = [];
 
     // build the default column configuration
     const defaultColumnConfig: Omit<
-      DefaultFormatConfig,
+      ColumnFormatConfig,
       "content"
     > = Object.assign({}, formatConfig.config, config);
     delete defaultColumnConfig.width;
 
     // turn all columns into objects
-    const formatColumns: DefaultFormatConfig[] = columns.map(function (column) {
-      let result: Partial<Column>;
+    const formatColumns: ColumnFormatConfig[] = columns.map(function (column) {
+      let mix: Column;
 
       if (typeof column === "string") {
-        result = { content: column };
+        mix = { content: column };
       } else if (!column || typeof column !== "object") {
-        result = {};
+        mix = { content: "" };
       } else {
-        result = column;
+        mix = column;
       }
 
-      result = Object.assign({ content: "" }, defaultColumnConfig, result);
+      const result = Object.assign({}, defaultColumnConfig, mix);
       if (!result.filler) result.filler = " ";
 
-      return result as DefaultFormatConfig;
+      return result;
     });
 
     // determine the amount of unclaimed width
-    unclaimedWidth = formatColumns.reduce(function (value, config, index) {
+    const unclaimedWidth = formatColumns.reduce(function (
+      value,
+      config,
+      index
+    ) {
       if (typeof config.width === "number") return value - config.width;
       columnsWithoutAssignedWidth.push(index);
       return value;
-    }, config.width - middlePaddingWidth * (columns.length - 1));
+    },
+    config.width - middlePaddingWidth * (columns.length - 1));
 
     // distribute unclaimed width
     if (columnsWithoutAssignedWidth.length > 0) {
@@ -452,14 +455,14 @@ class Columns {
       const widthPerColumnModulus =
         unclaimedWidth % columnsWithoutAssignedWidth.length;
       columnsWithoutAssignedWidth.forEach(function (index, i) {
-        var config = formatColumns[index];
+        const config = formatColumns[index];
 
         config.width = widthPerColumn + (i < widthPerColumnModulus ? 1 : 0);
       });
     }
 
     // get lines for individual columns
-    columnsLines = formatColumns.map((config) => {
+    const columnsLines = formatColumns.map(function (config) {
       return toLines(String(config.content), config);
     });
 
@@ -470,11 +473,9 @@ class Columns {
 
     // make all column lines have the same number of lines
     columnsLines.forEach((lines, colIndex) => {
-      var diff = totalLines - lines.length;
-      var i;
-      var line;
-      for (i = 0; i < diff; i++) {
-        line = toLines("\u200B", formatColumns[colIndex])[0].replace(
+      const diff = totalLines - lines.length;
+      for (let i = 0; i < diff; i++) {
+        const line = toLines("\u200B", formatColumns[colIndex])[0].replace(
           /\u200B/,
           ""
         );
@@ -494,7 +495,7 @@ class Columns {
     return result;
   }
   wrap(
-    columns: Array<string | Partial<Column> | null>,
+    columns: Array<string | Column | null>,
     configuration: Partial<FormatConfig> = {}
   ) {
     const config = Object.assign({}, formatConfig.columnConfig, configuration);
@@ -506,8 +507,10 @@ class Columns {
 }
 
 function getFiller(count: number, filler?: string) {
-  var result = "";
+  let result = "";
+
   if (count < 0) count = 0;
+
   if (filler && typeof filler === "string" && getStringWidth(filler) > 0) {
     while (getStringWidth(result) < count) {
       result += filler;
@@ -516,6 +519,7 @@ function getFiller(count: number, filler?: string) {
       result = result.substr(0, result.length - 1);
     }
   }
+
   return result;
 }
 
@@ -531,16 +535,12 @@ function maximizeLargeWord(
   hardBreakStr: string,
   maxWidth: number
 ) {
-  var availableWidth;
-  var ch;
-  var chWidth;
-  var i;
-
-  availableWidth = maxWidth - getStringWidth(hardBreakStr);
+  let availableWidth = maxWidth - getStringWidth(hardBreakStr);
+  let i;
 
   for (i = 0; i < word.length; i++) {
-    ch = word.charAt(i);
-    chWidth = getStringWidth(ch);
+    const ch = word.charAt(i);
+    const chWidth = getStringWidth(ch);
     if (availableWidth >= chWidth) {
       availableWidth -= chWidth;
     } else {

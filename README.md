@@ -1,26 +1,33 @@
 # cli-format
 
-A command line formatting that makes it easy to manage word wrapping, indents, padding, columns, and more. Also works with ansi-encoding libraries chalk, colors, and others.
-    
+A command line formatting that makes it easy to manage word wrapping, indents, padding, columns, and more. Also works with ansi-encoding libraries chalk, colors, and others. Fork from [https://github.com/Gi60s/cli-format](https://github.com/Gi60s/cli-format) and work on Deno only.
+
 ## Features
 
- 1. Word wrapping
- 2. Lines output
- 3. Columns output
- 4. Ansi support both [chalk](https://www.npmjs.com/package/chalk) and [colors](https://www.npmjs.com/package/colors)
- 5. First line indent
- 6. Hanging indent
- 8. Automatic available width detection
- 9. Hard breaks for long words
- 10. Reusable utilities
-    
+1.  Word wrapping
+2.  Lines output
+3.  Columns output
+4.  Ansi support both [chalk](https://www.npmjs.com/package/chalk) and [colors](https://www.npmjs.com/package/colors)
+5.  First line indent
+6.  Hanging indent
+7.  Automatic available width detection
+8.  Hard breaks for long words
+9.  Reusable utilities
+
 ## Example Usage
 
 ### Word Wrap
 
-```js
-var cliFormat = require('cli-format');
-var result = cliFormat.wrap('This line will automatically wrap at column 20', { width: 20 });
+```ts
+import cliFormat from "https://raw.githubusercontent.com/zongwei007/cli-format-deno/v3.x/src/mod.ts";
+
+const result = cliFormat.wrap(
+  "This line will automatically wrap at column 20",
+  {
+    width: 20,
+  }
+);
+
 console.log(result);
 
 /*
@@ -29,37 +36,43 @@ automatically wrap at
 column 20
 */
 ```
-    
+
 ### Lines for Word Wrap
 
-```js
-var cliFormat = require('cli-format');
-var config = {
-    width: 20,
-    filler: false,
-    ansi: false
+```ts
+import cliFormat from "https://raw.githubusercontent.com/zongwei007/cli-format-deno/v3.x/src/mod.ts";
+
+const config = {
+  width: 20,
+  filler: false,
+  ansi: false,
 };
-var result = cliFormat.lines('This line will automatically wrap at column 20', config);
+
+const result = cliFormat.lines(
+  "This line will automatically wrap at column 20",
+  config
+);
+
 console.log(result);
 
 // [ "This line will", "automatically wrap at", "column 20" ]
 ```
-    
+
 ### Column Wrapping
 
-```js
-var cliFormat = require('cli-format');
+```ts
+import cliFormat from "https://raw.githubusercontent.com/zongwei007/cli-format-deno/v3.x/src/mod.ts";
 
-var col1 = 'This column uses defaults';
-var col2 = {
-    content: 'This column uses a custom configuration.',
-    width: 15,
-    filler: '.'
+const col1 = "This column uses defaults";
+const col2 = {
+  content: "This column uses a custom configuration.",
+  width: 15,
+  filler: ".",
 };
 
-var config = { width: 40, paddingMiddle: ' | ' };
+const config = { width: 40, paddingMiddle: " | " };
 
-var result = cliFormat.columns.wrap([col1, col2], config);
+const result = cliFormat.columns.wrap([col1, col2], config);
 console.log(result);
 
 /*
@@ -71,13 +84,14 @@ defaults              | uses a custom..
 
 ### Text Justification
 
-```js
-var cliFormat = require('cli-format');
+```ts
+import cliFormat from "https://raw.githubusercontent.com/zongwei007/cli-format-deno/v3.x/src/mod.ts";
 
-var input = 'The quick brown fox jumped over the lazy ' +
-    'dog and the cow said moo to you too.';
-    
-var result = cliFormat.wrap(input, { width: 20, justify: true });
+const input =
+  "The quick brown fox jumped over the lazy " +
+  "dog and the cow said moo to you too.";
+
+const result = cliFormat.wrap(input, { width: 20, justify: true });
 console.log(result);
 
 /*
@@ -99,7 +113,7 @@ The functions `.wrap()`, `.lines()`, `.columns.wrap()`, and `.columns.lines()` e
 - **justify** - Set to true to justify wrapped text. Defaults to `false`.
 - **justifyLimit** - The maximum number of spaces to add between words when justifying.
 - **hangingIndent** - A string to put at the beginning of all except the first line of your content. Defaults to an empty string.
-- **paddingLeft** - A string to put at the beginning of every line, before the *firstLineIndent* and the *hangingIndent*.
+- **paddingLeft** - A string to put at the beginning of every line, before the _firstLineIndent_ and the _hangingIndent_.
 - **paddingMiddle** - A string to place between columns. This option will only be recognized as a column configuration option. Defaults to three spaces.
 - **paddingRight** - A string to put at the ending of every line. Defaults to an empty string.
 - **trimEndOfLine** - Use true to trim spaces off the end of each line or use false to keep spaces. Defaults to `true`.
@@ -157,8 +171,8 @@ Get the code group and name from the code number.
 
 **Example**
 
-```js
-var result = cliFormat.ansi.id(1);
+```ts
+const result = cliFormat.ansi.id(1);
 console.log(result);
 
 /*
@@ -176,7 +190,7 @@ Wrap contents into columns and get back the wrapped lines.
 
 **Parameters**
 
-- **columns** - This is an array of string or object values. If an array item is a *string* then the string will be used to specify the content for the column and all other configuration options for that column will be inherited from the `defaultValues.config` options. If an array item is an *object* then the object must have a `content` property that specifies the content for the column. Other configuration options can also be placed here and will be merged with the `defaultValues.config` options.
+- **columns** - This is an array of string or object values. If an array item is a _string_ then the string will be used to specify the content for the column and all other configuration options for that column will be inherited from the `defaultValues.config` options. If an array item is an _object_ then the object must have a `content` property that specifies the content for the column. Other configuration options can also be placed here and will be merged with the `defaultValues.config` options.
 - **configuration** - This configuration should be used to specify the total `width` of the columns area as well as what the `paddingMiddle` value should be. Any other options specified here will be merged into the options for each column provided in the first parameter.
 
 **Returns** an array of strings.
@@ -236,7 +250,7 @@ Take a string and replace character sequences with new sequences.
 **Parameters**
 
 - **content** - The text to transform.
-- **configuration** - An object that maps values that are into what they should be. For example, `{ '\t': '  '` will replace tab characters with two spaces. This configuration is merged with the `defaultValues.transform` configuration.
+- **configuration** - An object that maps values that are into what they should be. For example, `{ '\t': ' '` will replace tab characters with two spaces. This configuration is merged with the `defaultValues.transform` configuration.
 
 **Returns** a string.
 
