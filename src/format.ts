@@ -4,9 +4,7 @@ import stringWidth from "../deps/string-width.ts";
 
 import type { FormatConfig } from "./format-config.ts";
 
-export type Column = Partial<ColumnFormatConfig> & {
-  content: ColumnFormatConfig["content"];
-};
+export type Column = Partial<ColumnFormatConfig>;
 
 export type ColumnFormatConfig = Omit<FormatConfig, "width"> & {
   content: string | number | boolean;
@@ -424,12 +422,12 @@ class Columns {
       if (typeof column === "string") {
         mix = { content: column };
       } else if (!column || typeof column !== "object") {
-        mix = { content: "" };
+        mix = {};
       } else {
         mix = column;
       }
 
-      const result = Object.assign({}, defaultColumnConfig, mix);
+      const result = Object.assign({ content: "" }, defaultColumnConfig, mix);
       if (!result.filler) result.filler = " ";
 
       return result;
